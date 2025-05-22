@@ -47,10 +47,10 @@ This project is configured for deployment to AWS ap-southeast-1 (Singapore) regi
 The following secrets need to be configured in GitHub:
 - `AWS_ACCESS_KEY_ID`
 - `AWS_SECRET_ACCESS_KEY`
-- `DB_HOST`
-- `DB_DATABASE`
-- `DB_USERNAME`
-- `DB_PASSWORD`
+- `DB_HOST` - laravel-todo-api-db-dbinstance-wp3okth2utvx.c78cio22ev7t.ap-southeast-1.rds.amazonaws.com
+- `DB_DATABASE` - laravel_todo_api
+- `DB_USERNAME` - admin
+- `DB_PASSWORD` - Password123
 
 ### CloudFormation Templates
 
