@@ -36,6 +36,9 @@ COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 # Install dependencies
 RUN composer install --optimize-autoloader --no-dev
 
+# Copy environment file
+COPY .env.example .env
+
 # Generate application key
 RUN php artisan key:generate
 
