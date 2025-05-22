@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'CloudFormation template for RDS MySQL database for Laravel Todo API'
+Description: 'CloudFormation template for RDS MySQL database for Laravel Todo API in ap-southeast-1'
 
 Parameters:
   VpcId:

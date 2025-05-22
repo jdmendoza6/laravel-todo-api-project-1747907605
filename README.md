@@ -23,7 +23,7 @@ The API will be available at `http://localhost:8000/api/todos`
 
 ## AWS Deployment
 
-This project is configured for deployment to AWS using:
+This project is configured for deployment to AWS ap-southeast-1 (Singapore) region using:
 - Amazon ECR (Elastic Container Registry) for storing Docker images
 - Amazon ECS (Elastic Container Service) for running containers
 - Application Load Balancer for routing traffic

@@ -7,7 +7,7 @@ on:
       - ecs
 
 env:
-  AWS_REGION: us-east-1
+  AWS_REGION: ap-southeast-1
   ECR_REPOSITORY: laravel-todo-api
   ECS_SERVICE: laravel-todo-api-service
   ECS_CLUSTER: laravel-todo-api-cluster

@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'CloudFormation template for Laravel Todo API ECS Service with ALB'
+Description: 'CloudFormation template for Laravel Todo API ECS Service with ALB in ap-southeast-1'
 
 Parameters:
   VpcId:
