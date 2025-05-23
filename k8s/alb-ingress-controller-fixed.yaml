@@ -31,7 +31,7 @@ spec:
         - args:
             - --cluster-name=laravel-todo-api-cluster
             - --ingress-class=alb
-            - --aws-vpc-id=vpc-xxx # This will be updated by the deployment script
+            - --aws-vpc-id=vpc-0534cfd6e529be73d
             - --aws-region=ap-southeast-1
           image: public.ecr.aws/eks/aws-load-balancer-controller:v2.5.2
           livenessProbe:

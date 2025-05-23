@@ -1,6 +1,6 @@
 # Laravel Todo API
 
-This is a Laravel-based API that provides functionality for managing todo items. The application is configured for deployment to AWS using ECR, ECS, and an Application Load Balancer.
+This is a Laravel-based API that provides functionality for managing todo items. The application is configured for deployment to AWS using ECR, ECS, and an Application Load Balancer. It can also be deployed to Amazon EKS.
 
 ## API Endpoints
 
@@ -8,6 +8,7 @@ This is a Laravel-based API that provides functionality for managing todo items.
 - `POST /api/todos` - Create a new todo
 - `PUT /api/todos/{id}/toggle` - Toggle todo completion status
 - `DELETE /api/todos/{id}` - Delete a todo
+- `GET /api/health` - Health check endpoint
 
 ## Local Development Setup
 
@@ -21,7 +22,9 @@ This is a Laravel-based API that provides functionality for managing todo items.
 
 The API will be available at `http://localhost:8000/api/todos`
 
-## AWS Deployment
+## AWS Deployment Options
+
+### ECS Deployment
 
 This project is configured for deployment to AWS ap-southeast-1 (Singapore) region using:
 - Amazon ECR (Elastic Container Registry) for storing Docker images
@@ -29,20 +32,20 @@ This project is configured for deployment to AWS ap-southeast-1 (Singapore) regi
 - Application Load Balancer for routing traffic
 - CloudFormation for infrastructure as code
 
-### Deployment Process
+#### Deployment Process
 
 1. Push changes to the `ecs` branch
 2. GitHub Actions workflow will:
    - Build and push a Docker image to ECR
    - Deploy the CloudFormation stack for ECS service with ALB
 
-### Required AWS Resources
+#### Required AWS Resources
 
 - VPC with public subnets
 - RDS MySQL database (can be deployed using the included CloudFormation template)
 - IAM permissions for GitHub Actions
 
-### Environment Variables
+#### Environment Variables
 
 The following secrets need to be configured in GitHub:
 - `AWS_ACCESS_KEY_ID`
@@ -52,7 +55,27 @@ The following secrets need to be configured in GitHub:
 - `DB_USERNAME` - admin
 - `DB_PASSWORD` - Password123
 
-### CloudFormation Templates
+#### CloudFormation Templates
 
 - `cloudformation/ecs-service.yml` - Deploys the ECS service with ALB
 - `cloudformation/rds.yml` - Deploys an RDS MySQL database (optional)
+
+### EKS Deployment
+
+For deployment to Amazon EKS, please refer to the [EKS Deployment Guide](README-EKS.md).
+
+The EKS deployment uses:
+- Amazon EKS for Kubernetes orchestration
+- AWS Load Balancer Controller for managing ALBs
+- Amazon RDS for MySQL database
+- Amazon ECR for container images
+
+#### Deployment Process
+
+Run the automated deployment script:
+
+```bash
+./k8s/deploy-eks.sh
+```
+
+For detailed instructions and manual deployment steps, see the [EKS Deployment Guide](README-EKS.md).
