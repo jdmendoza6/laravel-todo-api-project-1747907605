@@ -7,6 +7,7 @@ This guide provides detailed instructions for deploying the Laravel Todo API to 
 1. AWS CLI installed and configured with appropriate permissions
 2. Docker installed locally
 3. Git repository with access to the `ecs` branch
+4. MySQL client installed (for database setup)
 
 ## Deployment Steps
 
@@ -15,6 +16,11 @@ This guide provides detailed instructions for deploying the Laravel Todo API to 
 First, deploy the MySQL database using CloudFormation:
 
 ```bash
+# Using the deployment script
+cd scripts
+./deploy-rds.sh vpc-XXXXXXXX "subnet-XXXXXXXX,subnet-YYYYYYYY" YourPassword123
+
+# Or manually using AWS CLI
 aws cloudformation deploy \
   --template-file cloudformation/rds.yml \
   --stack-name laravel-todo-api-db \
@@ -35,7 +41,40 @@ aws cloudformation describe-stacks \
   --output text
 ```
 
-### 2. Create ECR Repository
+### 2. Set Up Database Schema
+
+You can set up the database schema using one of the following methods:
+
+#### Option 1: Using the setup script
+
+```bash
+cd scripts
+./setup-database.sh your-rds-endpoint.ap-southeast-1.rds.amazonaws.com admin YourPassword123 laravel_todo_api
+```
+
+#### Option 2: Using the SQL script directly
+
+```bash
+mysql -h your-rds-endpoint.ap-southeast-1.rds.amazonaws.com -u admin -pYourPassword123 < cloudformation/rds-setup.sql
+```
+
+#### Option 3: Using Laravel migrations
+
+```bash
+# Set environment variables
+export DB_HOST=your-rds-endpoint.ap-southeast-1.rds.amazonaws.com
+export DB_DATABASE=laravel_todo_api
+export DB_USERNAME=admin
+export DB_PASSWORD=YourPassword123
+
+# Run migrations
+php artisan migrate --force --env=production
+
+# Seed the database with sample data
+php artisan db:seed --force --env=production
+```
+
+### 3. Create ECR Repository
 
 Create an ECR repository to store your Docker images:
 
@@ -45,7 +84,7 @@ aws ecr create-repository \
   --region ap-southeast-1
 ```
 
-### 3. Build and Push Docker Image
+### 4. Build and Push Docker Image
 
 Build the Docker image and push it to ECR:
 
@@ -63,7 +102,7 @@ docker tag laravel-todo-api:latest ACCOUNT_ID.dkr.ecr.ap-southeast-1.amazonaws.c
 docker push ACCOUNT_ID.dkr.ecr.ap-southeast-1.amazonaws.com/laravel-todo-api:latest
 ```
 
-### 4. Deploy ECS Service
+### 5. Deploy ECS Service
 
 Deploy the ECS service using CloudFormation:
 
@@ -82,7 +121,7 @@ aws cloudformation deploy \
     DBPassword=YourPassword123
 ```
 
-### 5. Configure Security Groups
+### 6. Configure Security Groups
 
 Ensure the RDS security group allows traffic from the ECS security group:
 
@@ -109,7 +148,7 @@ aws ec2 authorize-security-group-ingress \
   --source-group $ECS_SG
 ```
 
-### 6. Get the Application URL
+### 7. Get the Application URL
 
 Get the ALB DNS name to access your application:
 
@@ -121,6 +160,26 @@ aws cloudformation describe-stacks \
 ```
 
 Your API will be available at `http://<LoadBalancerDNS>/api/todos`
+
+### 8. Verify Deployment
+
+Test the API endpoints to verify the deployment:
+
+```bash
+# Get all todos
+curl http://<LoadBalancerDNS>/api/todos
+
+# Create a new todo
+curl -X POST http://<LoadBalancerDNS>/api/todos \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Test from production"}'
+
+# Toggle a todo's completion status
+curl -X PUT http://<LoadBalancerDNS>/api/todos/1/toggle
+
+# Delete a todo
+curl -X DELETE http://<LoadBalancerDNS>/api/todos/1
+```
 
 ## GitHub Actions Deployment
 
@@ -135,6 +194,35 @@ To set up automated deployments with GitHub Actions:
    - `DB_PASSWORD` - Your database password
 
 2. Push changes to the `ecs` branch to trigger the deployment workflow.
+
+## Database Maintenance
+
+### Running Migrations
+
+To run migrations on the production database:
+
+```bash
+# Set environment variables
+export DB_HOST=your-rds-endpoint.ap-southeast-1.rds.amazonaws.com
+export DB_DATABASE=laravel_todo_api
+export DB_USERNAME=admin
+export DB_PASSWORD=YourPassword123
+
+# Run migrations
+php artisan migrate --force --env=production
+```
+
+### Database Backups
+
+To create a backup of the production database:
+
+```bash
+# Create a backup
+mysqldump -h your-rds-endpoint.ap-southeast-1.rds.amazonaws.com -u admin -pYourPassword123 laravel_todo_api > backup_$(date +%Y%m%d).sql
+
+# Restore from a backup
+mysql -h your-rds-endpoint.ap-southeast-1.rds.amazonaws.com -u admin -pYourPassword123 laravel_todo_api < backup_20250523.sql
+```
 
 ## Troubleshooting
 
@@ -166,4 +254,7 @@ aws logs get-log-events --log-group-name /ecs/laravel-todo-api-service --log-str
 
 # Force a new deployment
 aws ecs update-service --cluster laravel-todo-api-cluster --service laravel-todo-api-service --force-new-deployment
+
+# Test database connection
+mysql -h your-rds-endpoint.ap-southeast-1.rds.amazonaws.com -u admin -pYourPassword123 -e "SELECT 1;"
 ```
