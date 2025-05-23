@@ -28,37 +28,21 @@ WORKDIR /var/www
 # Copy existing application directory contents
 COPY . /var/www
 
+# Install dependencies
+RUN composer install
+
 # Copy nginx configuration
 COPY docker/nginx/nginx.conf /etc/nginx/sites-enabled/default
 
 # Copy supervisor configuration
 COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Install dependencies
-RUN composer install --optimize-autoloader --no-dev
-
-# Set environment variables directly in the container
-ENV DB_HOST=laravel-todo-api-db-dbinstance-wp3okth2utvx.c78cio22ev7t.ap-southeast-1.rds.amazonaws.com
-ENV DB_DATABASE=laravel_todo_api
-ENV DB_USERNAME=admin
-ENV DB_PASSWORD=Password123
-
-# Copy environment file and update it with actual values
-COPY .env.example .env
-RUN sed -i "s/\${DB_HOST}/$DB_HOST/g" .env && \
-    sed -i "s/\${DB_DATABASE}/$DB_DATABASE/g" .env && \
-    sed -i "s/\${DB_USERNAME}/$DB_USERNAME/g" .env && \
-    sed -i "s/\${DB_PASSWORD}/$DB_PASSWORD/g" .env
-
-# Generate application key
-RUN php artisan key:generate
+# Copy entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
-
-# Copy entrypoint script
-COPY docker-entrypoint-prod.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Expose port 80
 EXPOSE 80
