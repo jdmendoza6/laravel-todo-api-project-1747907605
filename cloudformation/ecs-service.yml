@@ -5,12 +5,10 @@ Parameters:
   VpcId:
     Type: AWS::EC2::VPC::Id
     Description: The VPC ID
-    Default: vpc-0123456789abcdef0
 
   SubnetIds:
     Type: List<AWS::EC2::Subnet::Id>
     Description: The list of subnet IDs
-    Default: subnet-0123456789abcdef0,subnet-0123456789abcdef1
 
   ImageUrl:
     Type: String
@@ -167,6 +165,7 @@ Resources:
       Protocol: HTTP
       UnhealthyThresholdCount: 5
       VpcId: !Ref VpcId
+      HealthCheckGracePeriodSeconds: 60
 
   # Listener
   Listener:
@@ -199,6 +198,7 @@ Resources:
         - ContainerName: !Ref ContainerName
           ContainerPort: !Ref ContainerPort
           TargetGroupArn: !Ref TargetGroup
+      HealthCheckGracePeriodSeconds: 60
 
 Outputs:
   LoadBalancerDNS:

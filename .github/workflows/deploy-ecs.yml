@@ -1,0 +1,62 @@
+name: Deploy to ECS
+
+on:
+  push:
+    branches:
+      - ecs
+
+env:
+  AWS_REGION: ap-southeast-1
+  ECR_REPOSITORY: laravel-todo-api
+  ECS_SERVICE: laravel-todo-api-service
+  ECS_CLUSTER: laravel-todo-api-cluster
+  CONTAINER_NAME: laravel-todo-api-container
+
+jobs:
+  deploy:
+    name: Deploy to ECS
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Build, tag, and push image to Amazon ECR
+      id: build-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        # Build a docker container and push it to ECR
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f Dockerfile.prod .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+    - name: Update task definition
+      run: |
+        # Create a new task definition file with environment variables
+        cat .aws/task-definition.json | \
+        sed -e "s|ACCOUNT_ID|${{ steps.login-ecr.outputs.registry }}|g" | \
+        sed -e "s|DB_HOST_PLACEHOLDER|${{ secrets.DB_HOST }}|g" | \
+        sed -e "s|DB_DATABASE_PLACEHOLDER|${{ secrets.DB_DATABASE }}|g" | \
+        sed -e "s|DB_USERNAME_PLACEHOLDER|${{ secrets.DB_USERNAME }}|g" | \
+        sed -e "s|DB_PASSWORD_PLACEHOLDER|${{ secrets.DB_PASSWORD }}|g" > task-definition.json
+        
+        # Register the new task definition
+        aws ecs register-task-definition --cli-input-json file://task-definition.json
+        
+        # Update the service to use the new task definition
+        aws ecs update-service --cluster ${{ env.ECS_CLUSTER }} --service ${{ env.ECS_SERVICE }} --task-definition ${{ env.ECS_SERVICE }}

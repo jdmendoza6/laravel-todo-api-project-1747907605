@@ -43,6 +43,12 @@ COPY .env.production .env
 # Generate application key if not already set
 RUN php artisan key:generate --force
 
+# Create necessary directories
+RUN mkdir -p /var/www/storage/logs
+RUN mkdir -p /var/www/storage/framework/cache
+RUN mkdir -p /var/www/storage/framework/sessions
+RUN mkdir -p /var/www/storage/framework/views
+
 # Set permissions
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
