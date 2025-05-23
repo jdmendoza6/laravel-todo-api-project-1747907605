@@ -1,0 +1,62 @@
+name: Deploy to Amazon ECS
+
+on:
+  push:
+    branches:
+      - main
+      - ecs
+
+env:
+  AWS_REGION: ap-southeast-1
+  ECR_REPOSITORY: laravel-todo-api
+  ECS_SERVICE: laravel-todo-api-service
+  ECS_CLUSTER: laravel-todo-api-cluster
+  CONTAINER_NAME: laravel-todo-api-container
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # Build a docker container and push it to ECR
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+      - name: Deploy CloudFormation stack
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: laravel-todo-api-stack
+          template: cloudformation/ecs-service.yml
+          parameter-overrides: >-
+            ImageUrl=${{ steps.build-image.outputs.image }},
+            ContainerName=${{ env.CONTAINER_NAME }},
+            ServiceName=${{ env.ECS_SERVICE }},
+            ClusterName=${{ env.ECS_CLUSTER }},
+            DBHost=${{ secrets.DB_HOST }},
+            DBName=${{ secrets.DB_DATABASE }},
+            DBUser=${{ secrets.DB_USERNAME }},
+            DBPassword=${{ secrets.DB_PASSWORD }}
+          no-fail-on-empty-changeset: "1"

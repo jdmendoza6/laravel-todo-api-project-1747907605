@@ -1,0 +1,30 @@
+[
+  {
+    "ParameterKey": "VpcId",
+    "ParameterValue": "vpc-0447c0387ccc33a5d"
+  },
+  {
+    "ParameterKey": "SubnetIds",
+    "ParameterValue": "subnet-0a154f2d6d756396d,subnet-03ae75250f92b931f,subnet-0f8e8091686c1d1c8"
+  },
+  {
+    "ParameterKey": "ImageUrl",
+    "ParameterValue": "029062221755.dkr.ecr.ap-southeast-1.amazonaws.com/laravel-todo-api:latest"
+  },
+  {
+    "ParameterKey": "DBHost",
+    "ParameterValue": "laravel-todo-api-db-dbinstance-wp3okth2utvx.c78cio22ev7t.ap-southeast-1.rds.amazonaws.com"
+  },
+  {
+    "ParameterKey": "DBName",
+    "ParameterValue": "laravel_todo_api"
+  },
+  {
+    "ParameterKey": "DBUser",
+    "ParameterValue": "admin"
+  },
+  {
+    "ParameterKey": "DBPassword",
+    "ParameterValue": "Password123"
+  }
+]

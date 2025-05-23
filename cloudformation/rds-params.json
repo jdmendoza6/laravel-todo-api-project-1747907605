@@ -1,0 +1,26 @@
+[
+  {
+    "ParameterKey": "VpcId",
+    "ParameterValue": "vpc-0447c0387ccc33a5d"
+  },
+  {
+    "ParameterKey": "SubnetIds",
+    "ParameterValue": "subnet-0a154f2d6d756396d,subnet-03ae75250f92b931f"
+  },
+  {
+    "ParameterKey": "DBName",
+    "ParameterValue": "laravel_todo_api"
+  },
+  {
+    "ParameterKey": "DBUsername",
+    "ParameterValue": "admin"
+  },
+  {
+    "ParameterKey": "DBPassword",
+    "ParameterValue": "Password123"
+  },
+  {
+    "ParameterKey": "DBInstanceClass",
+    "ParameterValue": "db.t3.micro"
+  }
+]
