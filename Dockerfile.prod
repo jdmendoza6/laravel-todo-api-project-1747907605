@@ -37,21 +37,11 @@ COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 # Install dependencies
 RUN composer install --optimize-autoloader --no-dev
 
-# Set environment variables directly in the container
-ENV DB_HOST=laravel-todo-api-db-dbinstance-wp3okth2utvx.c78cio22ev7t.ap-southeast-1.rds.amazonaws.com
-ENV DB_DATABASE=laravel_todo_api
-ENV DB_USERNAME=admin
-ENV DB_PASSWORD=Password123
+# Copy environment file for production
+COPY .env.production .env
 
-# Copy environment file and update it with actual values
-COPY .env.example .env
-RUN sed -i "s/\${DB_HOST}/$DB_HOST/g" .env && \
-    sed -i "s/\${DB_DATABASE}/$DB_DATABASE/g" .env && \
-    sed -i "s/\${DB_USERNAME}/$DB_USERNAME/g" .env && \
-    sed -i "s/\${DB_PASSWORD}/$DB_PASSWORD/g" .env
-
-# Generate application key
-RUN php artisan key:generate
+# Generate application key if not already set
+RUN php artisan key:generate --force
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache

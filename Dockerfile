@@ -38,7 +38,7 @@ COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN composer install --optimize-autoloader --no-dev
 
 # Set environment variables directly in the container
-ENV DB_HOST=laravel-todo-api-db-dbinstance-wp3okth2utvx.c78cio22ev7t.ap-southeast-1.rds.amazonaws.com
+ENV DB_HOST=laravel-todo-api-db-dbinstance-lupupqefqjop.cshtvtwrjk7t.ap-southeast-1.rds.amazonaws.com
 ENV DB_DATABASE=laravel_todo_api
 ENV DB_USERNAME=admin
 ENV DB_PASSWORD=Password123

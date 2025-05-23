@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    ports:
+      - "8080:80"
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: laravel-todo-api-db-dbinstance-lupupqefqjop.cshtvtwrjk7t.ap-southeast-1.rds.amazonaws.com
+      DB_PORT: 3306
+      DB_DATABASE: laravel_todo_api
+      DB_USERNAME: admin
+      DB_PASSWORD: Password123
+      APP_ENV: production
+      APP_DEBUG: "false"
