@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: laravel-todo-api
-  namespace: default
   labels:
     app: laravel-todo-api
 spec:
@@ -35,13 +34,25 @@ spec:
             cpu: "500m"
         env:
         - name: APP_NAME
-          value: "Laravel Todo API"
+          valueFrom:
+            configMapKeyRef:
+              name: laravel-todo-api-config
+              key: APP_NAME
         - name: APP_ENV
-          value: "production"
+          valueFrom:
+            configMapKeyRef:
+              name: laravel-todo-api-config
+              key: APP_ENV
         - name: APP_DEBUG
-          value: "false"
+          valueFrom:
+            configMapKeyRef:
+              name: laravel-todo-api-config
+              key: APP_DEBUG
         - name: APP_URL
-          value: "https://api.example.com"
+          valueFrom:
+            configMapKeyRef:
+              name: laravel-todo-api-config
+              key: APP_URL
         - name: DB_CONNECTION
           value: "mysql"
         - name: DB_HOST
@@ -67,7 +78,10 @@ spec:
               name: laravel-todo-api-secrets
               key: db-password
         - name: LOG_CHANNEL
-          value: "stderr"
+          valueFrom:
+            configMapKeyRef:
+              name: laravel-todo-api-config
+              key: LOG_CHANNEL
         livenessProbe:
           httpGet:
             path: /api/health
